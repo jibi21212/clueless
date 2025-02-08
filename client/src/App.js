@@ -2,6 +2,10 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navigation/Navbar';
 import Home from './pages/Home';
+import WardrobePage from './pages/WardrobePage';
+import CalendarPage from './pages/CalendarPage';
+import HistoryPage from './pages/HistoryPage';
+import SuggestionsPage from './pages/SuggestionsPage';
 import './App.css';
 
 function App() {
@@ -12,7 +16,10 @@ function App() {
         <main className="main-content">
           <Routes>
             <Route path="/" element={<Home />} />
-            {/* We'll add more routes as we create the components */}
+            <Route path="/wardrobe" element={<WardrobePage />} />
+            <Route path="/calendar" element={<CalendarPage />} />
+            <Route path="/history" element={<HistoryPage />} />
+            <Route path="/suggestions" element={<SuggestionsPage />} />
           </Routes>
         </main>
       </div>
