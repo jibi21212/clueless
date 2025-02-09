@@ -74,7 +74,6 @@ Follow the steps listed below to start using Clueless today!
     npm start
 
 
-
                             ----- 🚀 Future Enhancements 🚀 -----
 • AI-Powered Shopping Integration: Allow users to shop directly within the app by suggesting clothing items available for purchase based on their preferences and wardrobe.
 • Sustainable Fashion Integration: Provide recommendations for eco-friendly, sustainable fashion brands and products to promote environmentally conscious choices.
