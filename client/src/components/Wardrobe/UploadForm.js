@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { collection, addDoc } from 'firebase/firestore';
+import { db } from '../../firebase/config';
 import { useUser } from '../../context/UserContext';
 import './UploadForm.css';
 
@@ -16,18 +18,9 @@ const UploadForm = ({ onClose }) => {
   const [newColor, setNewColor] = useState('');
   const [previewImage, setPreviewImage] = useState(null);
 
-  // Available occasions list
   const occasionOptions = [
-    'casual',
-    'formal',
-    'business',
-    'sport',
-    'party',
-    'date',
-    'wedding',
-    'outdoor',
-    'beach',
-    'workout'
+    'casual', 'formal', 'business', 'sport', 'party',
+    'date', 'wedding', 'outdoor', 'beach', 'workout'
   ];
 
   const { getRootProps, getInputProps } = useDropzone({
@@ -89,20 +82,40 @@ const UploadForm = ({ onClose }) => {
     setNewColor('');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    const newItem = {
-      ...formData,
-      id: Date.now(),
-      imageUrl: previewImage,
-      dateAdded: new Date().toISOString()
-    };
+    // Validate form data
+    if (!formData.type || formData.colors.length === 0) {
+      alert('Please add at least one color and select a type');
+      return;
+    }
 
-    addToWardrobe(newItem);
-    handleReset();
-    if (onClose) onClose();
-  };
+    try {
+      // Create the item object without the file object
+      const newItem = {
+        colors: formData.colors,
+        type: formData.type,
+        pattern: formData.pattern,
+        season: formData.season,
+        occasions: formData.occasions,
+        description: formData.description,
+        imageUrl: previewImage, // Note: For now just storing the URL
+        dateAdded: new Date().toISOString()
+      };
+
+      // Add to Firestore through context
+      const result = await addToWardrobe(newItem);
+      
+      if (result) {
+        handleReset();
+        if (onClose) onClose();
+      }
+    } catch (error) {
+      console.error("Error adding item:", error);
+      alert("Failed to add item. Please try again.");
+    }
+};
 
   return (
     <div className="upload-form">

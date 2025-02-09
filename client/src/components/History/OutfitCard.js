@@ -2,7 +2,7 @@ import React from 'react';
 import './OutfitCard.css';
 
 const OutfitCard = ({ outfit, onRate }) => {
-  const { id, date, event, items, rating, weather } = outfit;
+  const { id, date, event, items, rating } = outfit;
 
   return (
     <div className="outfit-card">

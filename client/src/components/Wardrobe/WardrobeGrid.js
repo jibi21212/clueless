@@ -10,14 +10,34 @@ const WardrobeGrid = ({ items }) => {
   const [selectedItems, setSelectedItems] = useState(new Set());
   const navigate = useNavigate();
 
-  const handleDelete = (itemId) => {
+  const handleDelete = async (itemId) => {
     if (window.confirm('Are you sure you want to delete this item?')) {
-      deleteFromWardrobe(itemId);
-      setSelectedItems(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(itemId);
-        return newSet;
-      });
+      try {
+        await deleteFromWardrobe(itemId);
+        setSelectedItems(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(itemId);
+          return newSet;
+        });
+      } catch (error) {
+        console.error("Error deleting item:", error);
+        alert("Failed to delete item. Please try again.");
+      }
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (window.confirm(`Are you sure you want to delete ${selectedItems.size} items?`)) {
+      try {
+        const deletePromises = Array.from(selectedItems).map(itemId => 
+          deleteFromWardrobe(itemId)
+        );
+        await Promise.all(deletePromises);
+        setSelectedItems(new Set());
+      } catch (error) {
+        console.error("Error deleting items:", error);
+        alert("Failed to delete some items. Please try again.");
+      }
     }
   };
 
@@ -33,15 +53,7 @@ const WardrobeGrid = ({ items }) => {
     });
   };
 
-  const handleBulkDelete = () => {
-    if (window.confirm(`Are you sure you want to delete ${selectedItems.size} items?`)) {
-      selectedItems.forEach(id => deleteFromWardrobe(id));
-      setSelectedItems(new Set());
-    }
-  };
-
   const handleGetSuggestions = () => {
-    // Store selected items in localStorage or context for suggestions page
     const selectedClothes = items.filter(item => selectedItems.has(item.id));
     localStorage.setItem('selectedForSuggestions', JSON.stringify(selectedClothes));
     navigate('/suggestions');
@@ -49,7 +61,6 @@ const WardrobeGrid = ({ items }) => {
 
   return (
     <div className="wardrobe-container">
-      {/* Bulk Actions Bar */}
       {selectedItems.size > 0 && (
         <div className="bulk-actions-bar">
           <span>{selectedItems.size} items selected</span>
@@ -76,7 +87,6 @@ const WardrobeGrid = ({ items }) => {
             key={item.id} 
             className={`grid-item ${selectedItems.has(item.id) ? 'selected' : ''}`}
           >
-            {/* Move controls outside of item-image */}
             <input
               type="checkbox"
               className="item-checkbox"

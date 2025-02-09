@@ -1,39 +1,65 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useUser } from '../../context/UserContext';
 import OutfitCard from './OutfitCard';
 import './OutfitHistory.css';
 
 const OutfitHistory = () => {
-  // This will eventually come from your backend
-  const [outfits] = useState([
-    {
-      id: 1,
-      date: '2024-02-08',
-      event: 'Business Meeting',
-      items: [
-        { id: 1, type: 'shirt', color: 'white', image: 'placeholder.jpg' },
-        { id: 2, type: 'pants', color: 'black', image: 'placeholder.jpg' },
-      ],
-      rating: null,
-      weather: 'Sunny, 72°F',
-    },
-    // Add more sample outfits
-  ]);
+  const { outfitHistory } = useUser();
+  const [filteredOutfits, setFilteredOutfits] = useState([]);
+  const [timeFilter, setTimeFilter] = useState('all');
+  const [eventFilter, setEventFilter] = useState('all');
 
-  const handleRating = (outfitId, rating) => {
-    // This will eventually update the backend
-    console.log(`Outfit ${outfitId} rated ${rating}`);
-  };
+  useEffect(() => {
+    let filtered = [...outfitHistory];
+
+    // Apply time filter
+    if (timeFilter !== 'all') {
+      const now = new Date();
+      const filterDate = new Date();
+      switch (timeFilter) {
+        case 'week':
+          filterDate.setDate(now.getDate() - 7);
+          break;
+        case 'month':
+          filterDate.setMonth(now.getMonth() - 1);
+          break;
+        case 'year':
+          filterDate.setFullYear(now.getFullYear() - 1);
+          break;
+        default:
+          break;
+      }
+      filtered = filtered.filter(outfit => 
+        new Date(outfit.dateAdded) > filterDate
+      );
+    }
+
+    // Apply event filter
+    if (eventFilter !== 'all') {
+      filtered = filtered.filter(outfit => 
+        outfit.event?.toLowerCase() === eventFilter
+      );
+    }
+
+    setFilteredOutfits(filtered);
+  }, [outfitHistory, timeFilter, eventFilter]);
 
   return (
     <div className="outfit-history">
       <div className="history-filters">
-        <select defaultValue="all">
+        <select 
+          value={timeFilter}
+          onChange={(e) => setTimeFilter(e.target.value)}
+        >
           <option value="all">All Time</option>
           <option value="week">Past Week</option>
           <option value="month">Past Month</option>
           <option value="year">Past Year</option>
         </select>
-        <select defaultValue="all">
+        <select 
+          value={eventFilter}
+          onChange={(e) => setEventFilter(e.target.value)}
+        >
           <option value="all">All Events</option>
           <option value="business">Business</option>
           <option value="casual">Casual</option>
@@ -42,11 +68,10 @@ const OutfitHistory = () => {
       </div>
 
       <div className="outfits-grid">
-        {outfits.map((outfit) => (
+        {filteredOutfits.map((outfit) => (
           <OutfitCard 
             key={outfit.id}
             outfit={outfit}
-            onRate={handleRating}
           />
         ))}
       </div>

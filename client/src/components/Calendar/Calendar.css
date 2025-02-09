@@ -49,3 +49,33 @@
   .react-calendar__tile--now {
     background: #ffeb3b3d;
   }
+
+  .calendar-view {
+    padding: 20px;
+  }
+  
+  .calendar-layout {
+    display: flex;
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .calendar-section {
+    flex: 1;
+    min-width: 300px;
+  }
+  
+  .event-form-section {
+    flex: 1;
+    min-width: 300px;
+    padding: 20px;
+    background: #f5f5f5;
+    border-radius: 8px;
+  }
+  
+  @media (max-width: 768px) {
+    .calendar-layout {
+      flex-direction: column;
+    }
+  }

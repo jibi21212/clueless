@@ -5,10 +5,9 @@ const EventForm = ({ onSubmit, selectedDate }) => {
   const [eventData, setEventData] = useState({
     title: '',
     description: '',
-    dressCode: '',
+    dress_code: '', // Changed from dressCode to match context
     time: '',
     location: '',
-    weather: '', // This could be auto-filled based on weather API
   });
 
   const dressCodeOptions = [
@@ -23,25 +22,44 @@ const EventForm = ({ onSubmit, selectedDate }) => {
     'black-tie'
   ];
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmit({
-      ...eventData,
-      date: selectedDate,
-    });
-    setEventData({
-      title: '',
-      description: '',
-      dressCode: '',
-      time: '',
-      location: '',
-      weather: '',
-    });
+    
+    try {
+      console.log('Selected date:', selectedDate); // Debug log
+      
+      const formattedEvent = {
+        title: eventData.title,
+        description: eventData.description,
+        dress_code: eventData.dress_code,
+        time: eventData.time,
+        location: eventData.location,
+        date: selectedDate,
+        dateCreated: new Date().toISOString()
+      };
+  
+      console.log('Submitting event:', formattedEvent); // Debug log
+      
+      await onSubmit(formattedEvent);
+      console.log('Event submitted successfully'); // Debug log
+      
+      // Clear form after successful submission
+      setEventData({
+        title: '',
+        description: '',
+        dress_code: '',
+        time: '',
+        location: '',
+      });
+    } catch (error) {
+      console.error('Error submitting event:', error);
+      alert('Failed to add event. Please try again.');
+    }
   };
 
   return (
     <div className="event-form">
-      <h3>Add New Event</h3>
+      <h3>Add New Event for {selectedDate.toLocaleDateString()}</h3>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label>Event Title:</label>
@@ -75,8 +93,8 @@ const EventForm = ({ onSubmit, selectedDate }) => {
         <div className="form-group">
           <label>Dress Code:</label>
           <select
-            value={eventData.dressCode}
-            onChange={(e) => setEventData({...eventData, dressCode: e.target.value})}
+            value={eventData.dress_code}
+            onChange={(e) => setEventData({...eventData, dress_code: e.target.value})}
             required
           >
             <option value="">Select Dress Code</option>
