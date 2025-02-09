@@ -1,155 +1,141 @@
-import React, { useState } from 'react';
+// components/Suggestions/OutfitSuggestion.js
+import React, { useState, useEffect } from 'react';
+import { useUser } from '../../context/UserContext';
 import WeatherWidget from './WeatherWidget';
 import './OutfitSuggestion.css';
 
-const OutfitSuggestion = () => {
-  const [currentSuggestion, setCurrentSuggestion] = useState({
-    event: {
-      title: 'Business Meeting',
-      time: '10:00 AM',
-      dressCode: 'business'
-    },
-    outfit: {
-      top: { type: 'shirt', color: 'white', pattern: 'solid' },
-      bottom: { type: 'pants', color: 'navy', pattern: 'solid' },
-      shoes: { type: 'dress shoes', color: 'black' },
-      accessories: [
-        { type: 'tie', color: 'blue', pattern: 'striped' }
-      ]
-    },
-    weather: {
-      temperature: 72,
-      condition: 'Sunny',
-      precipitation: '0%'
-    }
+const OutfitSuggestion = ({ selectedClothes }) => {
+  const API_KEY = process.env.REACT_APP_WEATHER_API_KEY;
+  const { wardrobe, addToHistory } = useUser();
+  const [currentSuggestionIndex, setCurrentSuggestionIndex] = useState(0);
+  const [suggestions, setSuggestions] = useState([]);
+  const [weather, setWeather] = useState({
+    temperature: '',
+    condition: '',
+    precipitation: ''
   });
 
-  const [feedback, setFeedback] = useState(null);
+  // Generate outfit suggestions based on event, weather, and wardrobe
+  useEffect(() => {
+    // This is where you'd implement your outfit generation logic
+    const generateSuggestions = () => {
+      // Example logic - you'd want to make this more sophisticated
+      const tops = wardrobe.filter(item => item.type === 'shirt');
+      const bottoms = wardrobe.filter(item => item.type === 'pants');
+      const shoes = wardrobe.filter(item => item.type === 'shoes');
+      const accessories = wardrobe.filter(item => item.type === 'accessory');
 
-  const handleRegenerateOutfit = () => {
-    // This will eventually call the AI to generate a new suggestion
-    console.log('Regenerating outfit...');
+      let outfits = [];
+      // Generate different combinations
+      tops.forEach(top => {
+        bottoms.forEach(bottom => {
+          shoes.forEach(shoe => {
+            const outfit = {
+              items: [top, bottom, shoe],
+              accessories: accessories.slice(0, 1) // Optional accessory
+            };
+            outfits.push(outfit);
+          });
+        });
+      });
+
+      return outfits;
+    };
+
+    setSuggestions(generateSuggestions());
+  }, [wardrobe]);
+
+  // Fetch weather data
+  useEffect(() => {
+    const fetchWeather = async () => {
+      try {
+        // Replace with your API key and desired location
+        const response = await fetch(
+          `https://api.openweathermap.org/data/2.5/weather?q=YourCity&appid=${API_KEY}&units=imperial`
+        );
+        const data = await response.json();
+        
+        setWeather({
+          temperature: Math.round(data.main.temp),
+          condition: data.weather[0].main,
+          precipitation: `${data.main.humidity}%`
+        });
+      } catch (error) {
+        console.error('Error fetching weather:', error);
+      }
+    };
+
+    fetchWeather();
+  }, []);
+  
+  const handleTryAnother = () => {
+    if (currentSuggestionIndex < suggestions.length - 1) {
+      setCurrentSuggestionIndex(prev => prev + 1);
+    } else {
+      alert('No more suggestions available!');
+    }
   };
 
-  const handleSaveSuggestion = () => {
-    // Save the suggestion to history
-    console.log('Saving suggestion...');
+  const handleSaveOutfit = () => {
+    const currentOutfit = suggestions[currentSuggestionIndex];
+    addToHistory({
+      id: Date.now(),
+      date: new Date().toISOString(),
+      items: currentOutfit.items,
+      accessories: currentOutfit.accessories,
+      weather: weather,
+      event: 'Business Meeting', // Get this from your calendar/event context
+      rating: null
+    });
   };
 
-  const handleFeedback = (type) => {
-    setFeedback(type);
-    // This will eventually be used to improve suggestions
-    console.log(`Feedback recorded: ${type}`);
-  };
+  if (suggestions.length === 0) return <div>Loading suggestions...</div>;
+
+  const currentOutfit = suggestions[currentSuggestionIndex];
 
   return (
     <div className="outfit-suggestion">
       <div className="suggestion-header">
         <div className="event-info">
-          <h3>{currentSuggestion.event.title}</h3>
-          <p>{currentSuggestion.event.time} - {currentSuggestion.event.dressCode}</p>
+          <h3>Business Meeting</h3>
+          <p>10:00 AM - business</p>
         </div>
-        <WeatherWidget weather={currentSuggestion.weather} />
+        <WeatherWidget weather={weather} />
       </div>
 
-      <div className="suggested-outfit">
-        <h4>Suggested Outfit</h4>
-        <div className="outfit-items">
-          {/* Top */}
-          <div className="outfit-item">
+      <h4>Suggested Outfit</h4>
+      <div className="outfit-items">
+        {currentOutfit.items.map((item, index) => (
+          <div key={index} className="outfit-item">
             <div 
               className="item-preview"
-              style={{ backgroundColor: currentSuggestion.outfit.top.color }}
+              style={{ backgroundColor: item.colors[0] }}
             >
-              <span>{currentSuggestion.outfit.top.type}</span>
+              <span>{item.type}</span>
             </div>
             <div className="item-details">
-              <p>{currentSuggestion.outfit.top.color}</p>
-              <p>{currentSuggestion.outfit.top.pattern}</p>
+              <p>{item.colors.join(', ')}</p>
+              <p>{item.pattern}</p>
             </div>
           </div>
+        ))}
+      </div>
 
-          {/* Bottom */}
-          <div className="outfit-item">
-            <div 
-              className="item-preview"
-              style={{ backgroundColor: currentSuggestion.outfit.bottom.color }}
-            >
-              <span>{currentSuggestion.outfit.bottom.type}</span>
-            </div>
-            <div className="item-details">
-              <p>{currentSuggestion.outfit.bottom.color}</p>
-              <p>{currentSuggestion.outfit.bottom.pattern}</p>
-            </div>
-          </div>
+      <div className="suggestion-actions">
+        <button onClick={handleTryAnother} className="try-another-btn">
+          Try Another Outfit
+        </button>
+        <button onClick={handleSaveOutfit} className="save-btn">
+          Save Outfit
+        </button>
+      </div>
 
-          {/* Shoes */}
-          <div className="outfit-item">
-            <div 
-              className="item-preview"
-              style={{ backgroundColor: currentSuggestion.outfit.shoes.color }}
-            >
-              <span>{currentSuggestion.outfit.shoes.type}</span>
-            </div>
-            <div className="item-details">
-              <p>{currentSuggestion.outfit.shoes.color}</p>
-            </div>
-          </div>
-
-          {/* Accessories */}
-          {currentSuggestion.outfit.accessories.map((accessory, index) => (
-            <div key={index} className="outfit-item accessory">
-              <div 
-                className="item-preview"
-                style={{ backgroundColor: accessory.color }}
-              >
-                <span>{accessory.type}</span>
-              </div>
-              <div className="item-details">
-                <p>{accessory.color}</p>
-                {accessory.pattern && <p>{accessory.pattern}</p>}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="suggestion-actions">
-          <button 
-            className="regenerate-btn"
-            onClick={handleRegenerateOutfit}
-          >
-            Try Another Outfit
-          </button>
-          <button 
-            className="save-btn"
-            onClick={handleSaveSuggestion}
-          >
-            Save Outfit
-          </button>
-        </div>
-
-        <div className="feedback-section">
-          <p>How's this suggestion?</p>
-          <div className="feedback-buttons">
-            <button 
-              className={`feedback-btn ${feedback === 'too-casual' ? 'active' : ''}`}
-              onClick={() => handleFeedback('too-casual')}
-            >
-              Too Casual
-            </button>
-            <button 
-              className={`feedback-btn ${feedback === 'too-formal' ? 'active' : ''}`}
-              onClick={() => handleFeedback('too-formal')}
-            >
-              Too Formal
-            </button>
-            <button 
-              className={`feedback-btn ${feedback === 'perfect' ? 'active' : ''}`}
-              onClick={() => handleFeedback('perfect')}
-            >
-              Perfect!
-            </button>
-          </div>
+      <div className="feedback-section">
+        <p>How's this suggestion?</p>
+        <div className="feedback-buttons">
+          <button>Too Casual</button>
+          <button>Too Formal</button>
+          <button>Perfect!</button>
         </div>
       </div>
     </div>

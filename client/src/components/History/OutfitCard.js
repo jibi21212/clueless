@@ -24,8 +24,6 @@ const OutfitCard = ({ outfit, onRate }) => {
         ))}
       </div>
 
-      <div className="outfit-weather">{weather}</div>
-
       <div className="rating-section">
         <p>How did you like this outfit?</p>
         <div className="rating-buttons">
