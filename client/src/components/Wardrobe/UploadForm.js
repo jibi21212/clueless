@@ -1,15 +1,16 @@
-// components/Wardrobe/UploadForm.js
 import React, { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { useUser } from '../../context/UserContext';
 import './UploadForm.css';
 
-const UploadForm = () => {
+const UploadForm = ({ onClose }) => {
+  const { addToWardrobe } = useUser();
   const [formData, setFormData] = useState({
     colors: [],
     pattern: '',
     type: '',
     season: '',
-    occasions: [], // Changed from single occasion to array
+    occasions: [],
     description: ''
   });
   const [newColor, setNewColor] = useState('');
@@ -37,10 +38,10 @@ const UploadForm = () => {
     onDrop: (acceptedFiles) => {
       const file = acceptedFiles[0];
       setPreviewImage(URL.createObjectURL(file));
+      setFormData(prev => ({ ...prev, image: file }));
     }
   });
 
-  // Add new color
   const addColor = (e) => {
     e.preventDefault();
     if (newColor && !formData.colors.includes(newColor)) {
@@ -52,7 +53,6 @@ const UploadForm = () => {
     }
   };
 
-  // Remove color
   const removeColor = (colorToRemove) => {
     setFormData({
       ...formData,
@@ -60,7 +60,6 @@ const UploadForm = () => {
     });
   };
 
-  // Toggle occasion
   const toggleOccasion = (occasion) => {
     setFormData(prevData => {
       if (prevData.occasions.includes(occasion)) {
@@ -77,14 +76,6 @@ const UploadForm = () => {
     });
   };
 
-  // Handle form submission
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Submitting:', formData);
-    // Here you would typically send the data to your backend
-  };
-
-  // Reset form
   const handleReset = () => {
     setFormData({
       colors: [],
@@ -96,6 +87,21 @@ const UploadForm = () => {
     });
     setPreviewImage(null);
     setNewColor('');
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    const newItem = {
+      ...formData,
+      id: Date.now(),
+      imageUrl: previewImage,
+      dateAdded: new Date().toISOString()
+    };
+
+    addToWardrobe(newItem);
+    handleReset();
+    if (onClose) onClose();
   };
 
   return (
@@ -124,7 +130,6 @@ const UploadForm = () => {
       </div>
 
       <form onSubmit={handleSubmit}>
-        {/* Colors Section */}
         <div className="form-group">
           <label>Colors:</label>
           <div className="color-input-group">
@@ -158,7 +163,6 @@ const UploadForm = () => {
           </div>
         </div>
 
-        {/* Type Selection */}
         <div className="form-group">
           <label>Type:</label>
           <select
@@ -176,7 +180,6 @@ const UploadForm = () => {
           </select>
         </div>
 
-        {/* Pattern Input */}
         <div className="form-group">
           <label>Pattern:</label>
           <select
@@ -193,7 +196,6 @@ const UploadForm = () => {
           </select>
         </div>
 
-        {/* Season Selection */}
         <div className="form-group">
           <label>Season:</label>
           <select
@@ -209,7 +211,6 @@ const UploadForm = () => {
           </select>
         </div>
 
-        {/* Occasions Section */}
         <div className="form-group">
           <label>Occasions:</label>
           <div className="occasions-container">
@@ -226,7 +227,6 @@ const UploadForm = () => {
           </div>
         </div>
 
-        {/* Description */}
         <div className="form-group">
           <label>Description:</label>
           <textarea
@@ -237,7 +237,6 @@ const UploadForm = () => {
           />
         </div>
 
-        {/* Form Buttons */}
         <div className="form-buttons">
           <button type="submit" className="submit-btn">
             Add to Wardrobe
