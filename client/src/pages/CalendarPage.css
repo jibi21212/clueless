@@ -1,0 +1,53 @@
+.calendar-page {
+    padding: 20px;
+  }
+  
+  .calendar-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .calendar-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .selected-date-events {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .events-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .event-card {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 4px;
+    border-left: 4px solid #007bff;
+  }
+  
+  .event-card h4 {
+    margin: 0 0 10px 0;
+    color: #007bff;
+  }
+  
+  .event-card p {
+    margin: 5px 0;
+    color: #666;
+  }
+  
+  @media (max-width: 768px) {
+    .calendar-layout {
+      grid-template-columns: 1fr;
+    }
+  }
