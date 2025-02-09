@@ -19,7 +19,16 @@ export const UserProvider = ({ children }) => {
   const addEvent = (event) => {
     setEvents([...events, { ...event, id: Date.now() }]);
   };
-
+  const deleteFromWardrobe = (itemId) => {
+    setWardrobe(wardrobe.filter(item => item.id !== itemId));
+  };
+  const updateWardrobeItem = (updatedItem) => {
+    setWardrobe(prevWardrobe => 
+      prevWardrobe.map(item => 
+        item.id === updatedItem.id ? updatedItem : item
+      )
+    );
+  };
   const addToHistory = (outfit) => {
     setOutfitHistory([...outfitHistory, { ...outfit, id: Date.now() }]);
   };
@@ -33,6 +42,8 @@ export const UserProvider = ({ children }) => {
     outfitHistory,
     events,
     preferences,
+    deleteFromWardrobe,
+    updateWardrobeItem,
     addToWardrobe,
     addEvent,
     addToHistory,

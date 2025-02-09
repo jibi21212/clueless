@@ -1,105 +1,153 @@
 .wardrobe-grid {
-    padding: 20px;
-  }
-  
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 20px;
-    padding: 20px;
-  }
-  
-  .grid-item {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    overflow: hidden;
-    position: relative;
-    transition: transform 0.2s;
-  }
-  
-  .grid-item:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-  }
-  
-  .item-image {
-    width: 100%;
-    padding-top: 100%;
-    position: relative;
-    background-color: #f0f0f0;
-  }
-  
-  .placeholder-image {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ddd;
-  }
-  
-  .item-actions {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    display: none;
-    gap: 5px;
-  }
-  
-  .grid-item:hover .item-actions {
-    display: flex;
-  }
-  
-  .edit-btn,
-  .delete-btn {
-    padding: 5px;
-    border: none;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    cursor: pointer;
-    background-color: white;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.2s;
-  }
-  
-  .edit-btn:hover,
-  .delete-btn:hover {
-    transform: scale(1.1);
-  }
-  
-  .delete-btn:hover {
-    background-color: #ff4444;
-    color: white;
-  }
-  
-  .item-details {
-    padding: 15px;
-    text-align: center;
-  }
-  
-  .item-type {
-    font-weight: bold;
-    margin: 5px 0;
-    text-transform: capitalize;
-  }
-  
-  .color-tag {
-    display: inline-block;
-    padding: 2px 8px;
-    margin: 2px;
-    border-radius: 12px;
-    font-size: 0.8em;
-    color: white;
-    text-shadow: 0 0 2px rgba(0,0,0,0.5);
-  }
-  
-  .item-pattern,
-  .item-season {
-    color: #666;
-    font-size: 0.9em;
-    margin: 3px 0;
-  }
+  display: grid;
+  grid-template-columns: repeat(3, minmax(200px, 1fr));
+  gap: 20px;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.grid-item {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  height: auto; /* Remove fixed height */
+}
+
+/* Controls positioning - Separate them instead of using item-actions */
+.item-checkbox {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 20px;
+  height: 20px;
+}
+
+.delete-btn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+.edit-btn {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.item-image {
+  width: 150px; /* Fixed width */
+  height: 150px; /* Fixed height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 30px 0; /* Add margin to account for buttons */
+}
+
+.item-image img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.item-details {
+  width: 100%;
+  text-align: center;
+}
+
+.item-colors {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin: 5px 0;
+}
+
+.color-tag {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+}
+
+.item-pattern,
+.item-season {
+  margin: 2px 0;
+  color: #666;
+  font-size: 0.9em;
+}
+
+/* Style the buttons */
+.edit-btn,
+.delete-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.bulk-actions-bar {
+  position: sticky;
+  top: 0;
+  background-color: white;
+  padding: 10px 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 100;
+  margin-bottom: 20px;
+  border-radius: 8px;
+}
+
+.bulk-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.bulk-action-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.bulk-action-btn.delete {
+  background-color: #dc3545;
+  color: white;
+}
+
+.bulk-action-btn.delete:hover {
+  background-color: #c82333;
+}
+
+.bulk-action-btn.suggest {
+  background-color: #28a745;
+  color: white;
+}
+
+.bulk-action-btn.suggest:hover {
+  background-color: #218838;
+}
+
+/* Style for the selected count */
+.bulk-actions-bar span {
+  font-weight: 500;
+  color: #333;
+}
