@@ -1,6 +1,6 @@
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
-from .schemas import OutfitRequest, ClothingItem
+from .api.schemas import OutfitRequest, ClothingItem
 
 class OutfitGenerator:
     def __init__(self):

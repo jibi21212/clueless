@@ -1,41 +1,30 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from outfit_generator import OutfitGenerator
-from schemas import Weather, Event, ClothingItem, OutfitRequest
+from api.model import OutfitGenerator
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
 
 generator = OutfitGenerator()
 
-@app.route('/api/suggest-outfit', methods=['POST'])
+@app.route('/suggest-outfit', methods=['POST'])
 def suggest_outfit():
     try:
         data = request.json
+        print("Received request:", data)
         
-        # Create request object
-        wardrobe = [ClothingItem(**item) for item in data['wardrobe']]
-        weather = Weather(**data['weather'])
-        event = Event(**data['event'])
+        suggestion = generator.get_outfit_suggestion(data)
+        print("Generated suggestion:", suggestion)
         
-        request_obj = OutfitRequest(
-            wardrobe=wardrobe,
-            weather=weather,
-            event=event
-        )
-        
-        # Generate suggestion
-        suggestion = generator.generate_suggestion(request_obj)
-        
-        return jsonify({
-            'success': True,
-            'suggestion': [item.dict() for item in suggestion]
-        })
+        return jsonify({"suggestion": suggestion})
     except Exception as e:
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
+        print("Error:", str(e))
+        return jsonify({"error": str(e)}), 400
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    port = int(os.getenv('PORT', 8080))
+    app.run(host='0.0.0.0', port=port, debug=True)

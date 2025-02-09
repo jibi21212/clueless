@@ -12,3 +12,34 @@
   h2 {
     margin-bottom: 10px;
   }
+
+  .history-page {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .history-page h2 {
+    margin-bottom: 30px;
+    text-align: center;
+  }
+  
+  .history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .loading {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+  }
+  
+  .no-history {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+    background: #f8f9fa;
+    border-radius: 8px;
+  }

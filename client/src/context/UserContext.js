@@ -6,7 +6,9 @@ import {
   deleteDoc, 
   updateDoc, 
   doc, 
-  getDocs 
+  getDocs,
+  query as firestoreQuery,
+  orderBy as firestoreOrderBy
 } from 'firebase/firestore';
 
 const UserContext = createContext();
@@ -15,30 +17,64 @@ export const UserProvider = ({ children }) => {
   const [wardrobe, setWardrobe] = useState([]);
   const [outfitHistory, setOutfitHistory] = useState([]);
   const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true); // Added loading state
   const [preferences, setPreferences] = useState({
     stylePreferences: [],
     colorPreferences: [],
     occasionPreferences: []
   });
 
-  // Fetch initial wardrobe data
-// Add this after your wardrobe fetch effect
-useEffect(() => {
-  const fetchEvents = async () => {
-    try {
-      const querySnapshot = await getDocs(collection(db, 'events'));
-      const eventsList = [];
-      querySnapshot.forEach((doc) => {
-        eventsList.push({ id: doc.id, ...doc.data() });
-      });
-      setEvents(eventsList);
-    } catch (error) {
-      console.error("Error fetching events:", error);
-    }
-  };
+  // Fetch initial data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch wardrobe
+        const wardrobeSnapshot = await getDocs(collection(db, 'wardrobe'));
+        const wardrobeItems = wardrobeSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setWardrobe(wardrobeItems);
 
-  fetchEvents();
-}, []);
+        // Fetch outfit history
+        const historyQuery = firestoreQuery(
+          collection(db, 'outfitHistory'), 
+          firestoreOrderBy('date', 'desc')
+        );
+        const historySnapshot = await getDocs(historyQuery);
+        const historyItems = historySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setOutfitHistory(historyItems);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Fetch events
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'events'));
+        const eventsList = [];
+        querySnapshot.forEach((doc) => {
+          eventsList.push({ id: doc.id, ...doc.data() });
+        });
+        setEvents(eventsList);
+      } catch (error) {
+        console.error("Error fetching events:", error);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
   const addToWardrobe = async (item) => {
     try {
       console.log('Adding item to Firebase:', item);
@@ -52,9 +88,9 @@ useEffect(() => {
       console.error("Error adding to wardrobe:", error);
       throw error;
     }
-};
+  };
 
-const deleteFromWardrobe = async (itemId) => {
+  const deleteFromWardrobe = async (itemId) => {
     try {
       console.log('Deleting item from Firebase:', itemId);
       await deleteDoc(doc(db, 'wardrobe', itemId));
@@ -66,15 +102,13 @@ const deleteFromWardrobe = async (itemId) => {
       console.error("Error deleting from wardrobe:", error);
       throw error;
     }
-};
+  };
 
   const updateWardrobeItem = async (updatedItem) => {
     try {
-      // Update in Firestore
       const itemRef = doc(db, 'wardrobe', updatedItem.id);
       await updateDoc(itemRef, updatedItem);
       
-      // Update local state
       setWardrobe(prev => 
         prev.map(item => item.id === updatedItem.id ? updatedItem : item)
       );
@@ -87,31 +121,19 @@ const deleteFromWardrobe = async (itemId) => {
 
   const addEvent = async (event) => {
     try {
-      console.log('Received event data:', event); // Debug log
-  
-      // Format the event data for Firestore
       const eventData = {
         title: event.title,
         description: event.description,
         dress_code: event.dress_code,
         time: event.time,
         location: event.location,
-        date: new Date(event.date).toISOString(), // Ensure proper date formatting
+        date: new Date(event.date).toISOString(),
         dateCreated: new Date().toISOString()
       };
   
-      console.log('Formatted event data:', eventData); // Debug log
-  
-      // Add to Firestore
       const docRef = await addDoc(collection(db, 'events'), eventData);
-      console.log('Added to Firestore with ID:', docRef.id); // Debug log
-  
-      // Create new event object with ID
       const newEvent = { ...eventData, id: docRef.id };
-      
-      // Update local state
       setEvents(prev => [...prev, newEvent]);
-      
       return newEvent;
     } catch (error) {
       console.error("Error adding event:", error);
@@ -119,28 +141,46 @@ const deleteFromWardrobe = async (itemId) => {
     }
   };
 
+  const updateOutfitFeedback = async (outfitId, isPositive) => {
+    try {
+      const outfitRef = doc(db, 'outfitHistory', outfitId);
+      await updateDoc(outfitRef, {
+        feedback: isPositive,
+        updatedAt: new Date().toISOString()
+      });
+  
+      setOutfitHistory(prev => prev.map(outfit => 
+        outfit.id === outfitId 
+          ? { ...outfit, feedback: isPositive }
+          : outfit
+      ));
+    } catch (error) {
+      console.error("Error updating feedback:", error);
+      throw error;
+    }
+  };
   
   const addToHistory = async (outfit) => {
     try {
-      const historyData = {
-        outfit: outfit,
-        dateAdded: new Date().toISOString(),
-        feedback: true, // assuming accepted suggestion
-        feedback_history: {
-          feedback: [true],
-          Outfit: outfit
-        }
+      const docRef = await addDoc(collection(db, 'outfitHistory'), {
+        ...outfit,
+        dateAdded: new Date().toISOString()
+      });
+
+      const historyEntry = {
+        id: docRef.id,
+        ...outfit,
+        dateAdded: new Date().toISOString()
       };
-  
-      const docRef = await addDoc(collection(db, 'History'), historyData);
-      const newHistory = { ...historyData, id: docRef.id };
-      setOutfitHistory(prev => [...prev, newHistory]);
-      return newHistory;
+
+      setOutfitHistory(prev => [historyEntry, ...prev]);
+      return docRef.id;
     } catch (error) {
       console.error("Error adding to history:", error);
       throw error;
     }
   };
+  
   const updatePreferences = async (newPreferences) => {
     try {
       const preferencesRef = doc(db, 'preferences', 'userPreferences');
@@ -158,11 +198,13 @@ const deleteFromWardrobe = async (itemId) => {
     outfitHistory,
     events,
     preferences,
+    loading,
     deleteFromWardrobe,
     updateWardrobeItem,
     addToWardrobe,
     addEvent,
     addToHistory,
+    updateOutfitFeedback,
     updatePreferences
   };
 
@@ -180,3 +222,5 @@ export const useUser = () => {
   }
   return context;
 };
+
+export default UserProvider;

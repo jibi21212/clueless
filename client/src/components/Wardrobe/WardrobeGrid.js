@@ -99,12 +99,6 @@ const WardrobeGrid = ({ items }) => {
             >
               🗑️
             </button>
-            <button 
-              className="edit-btn"
-              onClick={() => setEditingItem(item)}
-            >
-              ✏️
-            </button>
             
             <div className="item-image">
               {item.imageUrl ? (
