@@ -1,0 +1,31 @@
+.weather-widget {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+  }
+  
+  .weather-icon {
+    font-size: 2em;
+  }
+  
+  .weather-info {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .temperature {
+    font-size: 1.2em;
+    font-weight: bold;
+  }
+  
+  .condition {
+    color: #666;
+  }
+  
+  .precipitation {
+    font-size: 0.9em;
+    color: #666;
+  }
