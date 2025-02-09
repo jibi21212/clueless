@@ -5,7 +5,7 @@ const EventForm = ({ onSubmit, selectedDate }) => {
   const [eventData, setEventData] = useState({
     title: '',
     description: '',
-    dress_code: '', // Changed from dressCode to match context
+    dress_code: '',
     time: '',
     location: '',
   });
@@ -24,26 +24,11 @@ const EventForm = ({ onSubmit, selectedDate }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     try {
-      console.log('Selected date:', selectedDate); // Debug log
-      
-      const formattedEvent = {
-        title: eventData.title,
-        description: eventData.description,
-        dress_code: eventData.dress_code,
-        time: eventData.time,
-        location: eventData.location,
-        date: selectedDate,
-        dateCreated: new Date().toISOString()
-      };
-  
-      console.log('Submitting event:', formattedEvent); // Debug log
-      
-      await onSubmit(formattedEvent);
-      console.log('Event submitted successfully'); // Debug log
-      
-      // Clear form after successful submission
+      await onSubmit({
+        ...eventData,
+        date: selectedDate
+      });
       setEventData({
         title: '',
         description: '',
@@ -53,45 +38,46 @@ const EventForm = ({ onSubmit, selectedDate }) => {
       });
     } catch (error) {
       console.error('Error submitting event:', error);
-      alert('Failed to add event. Please try again.');
     }
   };
 
   return (
-    <div className="event-form">
-      <h3>Add New Event for {selectedDate.toLocaleDateString()}</h3>
-      <form onSubmit={handleSubmit}>
+    <div className="event-form-container">
+      <form className="event-form" onSubmit={handleSubmit}>
+        <h3>Add New Event for {selectedDate.toLocaleDateString()}</h3>
+        
         <div className="form-group">
-          <label>Event Title:</label>
+          <label className="required">Event Title</label>
           <input
             type="text"
             value={eventData.title}
             onChange={(e) => setEventData({...eventData, title: e.target.value})}
+            placeholder="Enter event title"
             required
           />
         </div>
 
         <div className="form-group">
-          <label>Time:</label>
+          <label>Time</label>
           <input
             type="time"
             value={eventData.time}
             onChange={(e) => setEventData({...eventData, time: e.target.value})}
-            required
           />
         </div>
 
         <div className="form-group">
-          <label>Location:</label>
+          <label>Location</label>
           <input
             type="text"
             value={eventData.location}
             onChange={(e) => setEventData({...eventData, location: e.target.value})}
+            placeholder="Enter location"
           />
         </div>
 
         <div className="form-group">
-          <label>Dress Code:</label>
+          <label className="required">Dress Code</label>
           <select
             value={eventData.dress_code}
             onChange={(e) => setEventData({...eventData, dress_code: e.target.value})}
@@ -107,15 +93,18 @@ const EventForm = ({ onSubmit, selectedDate }) => {
         </div>
 
         <div className="form-group">
-          <label>Description:</label>
+          <label>Description</label>
           <textarea
             value={eventData.description}
             onChange={(e) => setEventData({...eventData, description: e.target.value})}
-            rows="3"
+            placeholder="Enter event description"
+            rows="4"
           />
         </div>
 
-        <button type="submit" className="submit-btn">Add Event</button>
+        <button type="submit" className="submit-btn">
+          Add Event
+        </button>
       </form>
     </div>
   );

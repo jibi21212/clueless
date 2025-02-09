@@ -79,3 +79,36 @@
       flex-direction: column;
     }
   }
+
+  .calendar-container {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .custom-calendar {
+    width: 100%;
+    border: none !important;
+  }
+  
+  .react-calendar {
+    width: 100% !important;
+    border: none !important;
+    background: white;
+    font-family: inherit;
+    line-height: 1.5;
+  }
+  
+  .react-calendar__tile {
+    padding: 1em 0.5em;
+    height: 60px;
+  }
+  
+  .event-dot {
+    height: 6px;
+    width: 6px;
+    background-color: #007bff;
+    border-radius: 50%;
+    margin: 2px auto 0;
+  }

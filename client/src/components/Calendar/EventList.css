@@ -1,0 +1,95 @@
+.events-list-container {
+    margin-top: 20px;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .events-list-container h3 {
+    margin: 0 0 20px 0;
+    color: #333;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 10px;
+  }
+  
+  .events-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .event-card {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    border-left: 4px solid #007bff;
+  }
+  
+  .event-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .event-header h4 {
+    margin: 0;
+    color: #007bff;
+  }
+  
+  .event-time {
+    color: #666;
+    font-size: 0.9em;
+  }
+  
+  .event-details {
+    color: #555;
+  }
+  
+  .event-location,
+  .event-dress-code {
+    margin: 5px 0;
+    font-size: 0.9em;
+  }
+  
+  .event-description {
+    margin-top: 10px;
+    font-size: 0.9em;
+    color: #666;
+  }
+  
+  .no-events {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    padding: 20px 0;
+  }
+  
+  /* Font Awesome icons styling */
+  .fas {
+    margin-right: 8px;
+    color: #007bff;
+  }
+
+  .events-list-container {
+    margin-top: 20px;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .events-list-container h3 {
+    margin: 0 0 20px 0;
+    color: #333;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 10px;
+  }
+  
+  .no-events {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    padding: 20px 0;
+  }

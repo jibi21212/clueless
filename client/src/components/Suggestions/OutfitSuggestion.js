@@ -1,72 +1,111 @@
 import React, { useState, useEffect } from 'react';
-import { useUser } from '../../context/UserContext';
-import WeatherWidget from './WeatherWidget';
+import { db } from '../../firebase/config';
 import './OutfitSuggestion.css';
 
 const OutfitSuggestion = ({ selectedClothes }) => {
-  const API_KEY = process.env.REACT_APP_WEATHER_API_KEY;
-  const { wardrobe } = useUser();
-  const [currentSuggestion, setCurrentSuggestion] = useState(null);
-  const [weather, setWeather] = useState({
-    temperature: '',
-    condition: '',
-    precipitation: ''
-  });
-  const [isLoading, setIsLoading] = useState(true);
+  const [suggestion, setSuggestion] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [weather, setWeather] = useState(null);
 
-  // Fetch weather data
   useEffect(() => {
-    const fetchWeather = async () => {
-      try {
-        const response = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?q=Toronto&appid=${API_KEY}&units=imperial`
-        );
-        const data = await response.json();
-        
-        const weatherData = {
-          temperature: Math.round(data.main.temp),
-          condition: data.weather[0].main,
-          precipitation: `${data.main.humidity}%`
-        };
-        
-        setWeather(weatherData);
-        // Once we have weather, get outfit suggestion
-        await getOutfitSuggestion(weatherData);
-      } catch (error) {
-        console.error('Error fetching weather:', error);
-      }
-    };
-
     fetchWeather();
   }, []);
 
-  const getOutfitSuggestion = async (weatherData) => {
-    setIsLoading(true);
+  const fetchWeather = async () => {
     try {
-      const response = await fetch('YOUR_CLOUD_RUN_URL/suggest-outfit', {
+      // Replace with your actual weather API
+      const response = await fetch('YOUR_WEATHER_API_ENDPOINT');
+      const data = await response.json();
+      setWeather({
+        temperature: data.temperature,
+        condition: data.condition
+      });
+    } catch (error) {
+      console.error('Error fetching weather:', error);
+      setError('Failed to fetch weather data');
+    }
+  };
+
+  const generateSuggestion = async () => {
+    if (!selectedClothes.length || !weather) {
+      setError('Please select clothes and ensure weather data is available');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch('http://localhost:5000/api/suggest-outfit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          wardrobe: wardrobe,
-          weather: weatherData,
+          wardrobe: selectedClothes,
+          weather: weather,
           event: {
-            type: 'business meeting',
-            time: '10:00 AM',
-            dress_code: 'business'
+            type: 'casual',
+            time: new Date().toISOString(),
+            dress_code: 'casual'
           }
         })
       });
 
-      const suggestion = await response.json();
-      setCurrentSuggestion(suggestion);
+      const data = await response.json();
+      
+      if (data.success) {
+        setSuggestion(data.suggestion);
+      } else {
+        setError(data.error || 'Failed to generate suggestion');
+      }
     } catch (error) {
-      console.error('Error getting suggestion:', error);
+      console.error('Error generating suggestion:', error);
+      setError('Failed to generate outfit suggestion');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  // ... rest of your component code
+  return (
+    <div className="outfit-suggestion">
+      {error && <div className="error-message">{error}</div>}
+      
+      <div className="weather-info">
+        {weather && (
+          <>
+            <h3>Current Weather</h3>
+            <p>Temperature: {weather.temperature}°F</p>
+            <p>Condition: {weather.condition}</p>
+          </>
+        )}
+      </div>
+
+      <button 
+        onClick={generateSuggestion}
+        disabled={loading || !selectedClothes.length || !weather}
+        className="generate-button"
+      >
+        {loading ? 'Generating...' : 'Generate Outfit Suggestion'}
+      </button>
+
+      {suggestion && (
+        <div className="suggestion-result">
+          <h3>Suggested Outfit</h3>
+          <div className="suggested-items">
+            {suggestion.map((item, index) => (
+              <div key={index} className="suggested-item">
+                <p className="item-type">{item.type}</p>
+                <p className="item-colors">Colors: {item.colors.join(', ')}</p>
+                <p className="item-pattern">Pattern: {item.pattern}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
+
+export default OutfitSuggestion;

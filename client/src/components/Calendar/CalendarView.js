@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Calendar from './Calendar';
 import EventForm from './EventForm';
+import EventList from './EventList'; // Add this import
 import { useUser } from '../../context/UserContext';
 import 'react-calendar/dist/Calendar.css';
 import './Calendar.css';
@@ -36,6 +37,11 @@ const CalendarView = () => {
           <Calendar
             events={events}
             onDateSelect={handleDateSelect}
+            selectedDate={selectedDate}
+          />
+          {/* Add EventList here */}
+          <EventList 
+            events={events} 
             selectedDate={selectedDate}
           />
         </div>
